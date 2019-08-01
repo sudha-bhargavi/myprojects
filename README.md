@@ -109,7 +109,7 @@ Use Etag headers for syncroniation of updates. Other option was to use Last upda
               This API will pull a movie or tvSeries with the give ID, and its ratings and their seson ratings.
               
 
-<h4>2nd Part of the Task</h4>: Tv Series`s  seasons rating is calculated using Average rating of all its episodes
+<h4>2nd Part of the Task</h4> Tv Series`s  seasons rating is calculated using Average rating of all its episodes
               
               
               5: URL GET: localhost:8080/tvSeries/{id}/rating 
