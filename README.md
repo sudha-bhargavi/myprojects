@@ -83,7 +83,10 @@ Use Etag headers for synchronization of updates. Other option was to use Last up
               jdbc URL for h2 console: jdbc:h2:~/moviedb
 	      
               
-              14: Open a rest client like postman and access the following URLs to run application
+              14: Open a rest client like postman and access the following URLs to run application.
+	      
+	      
+	      Make sure every request is in new tab if testing from postman
               
             
 2. <b>Testing</b>
