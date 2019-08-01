@@ -1,6 +1,6 @@
 package com.domain.myprojects.moviesservice.controller;
 
-import com.domain.myprojects.moviesservice.common.CustomeErrorMessage;
+import com.domain.myprojects.moviesservice.common.ResourceNotFoundException;
 import com.domain.myprojects.moviesservice.resource.Episode;
 import com.domain.myprojects.moviesservice.resource.Movie;
 import com.domain.myprojects.moviesservice.resource.Principals;
@@ -9,8 +9,6 @@ import com.domain.myprojects.moviesservice.service.CrewAndCastService;
 import com.domain.myprojects.moviesservice.service.EpisodeService;
 import com.domain.myprojects.moviesservice.service.MovieService;
 import com.domain.myprojects.moviesservice.service.RatingService;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +33,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
@@ -44,11 +41,6 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @Component
 public class MovieController {
 	public static final Logger logger = LoggerFactory.getLogger(MovieController.class);
-	private Cache<String,String> moviesCache = CacheBuilder.newBuilder()
-			.concurrencyLevel(4).expireAfterAccess(30, TimeUnit.MINUTES).build();
-
-	private Cache<String,String> tvSeriesCache = CacheBuilder.newBuilder()
-			.concurrencyLevel(4).expireAfterAccess(30, TimeUnit.MINUTES).build();
 
 	@Autowired
 	private MovieService movieService;
@@ -62,20 +54,27 @@ public class MovieController {
 	@Autowired
 	private EpisodeService episodeService;
 
+	/**
+	 * Get a movie by its Id
+	 * @param id
+	 * @return Movie
+	 */
 	@RequestMapping(value = {"/movies/{id}", "/tvSeries/{id}"})
 	@ResponseBody
 	public ResponseEntity<Movie> getMovie(@PathVariable String id) {
 		Optional<Movie> movie = movieService.getMovie(id);
 		if (!movie.isPresent()) {
 			logger.error("Movie with id {} not found.", id);
-			return new ResponseEntity(new CustomeErrorMessage("Movie with id " + movie
-					+ " not found"), HttpStatus.NOT_FOUND);
+			throw new ResourceNotFoundException("Invalid employee id : " + id);
 		}
 		addRatingLink(movie.get());
+		addCastAdnCrew(movie.get());
+
 		return new ResponseEntity(movie.get(), HttpStatus.OK);
 	}
 
 	private void addRatingLink(Movie m) {
+		logger.info("Adding rating link for movie {}", m);
 		Link selfLink;
 		if(m.getTitleType().equalsIgnoreCase("tvSeries"))
 			selfLink = linkTo(MovieController.class).slash("tvSeries/" + m.getMovieId()).withSelfRel();
@@ -90,6 +89,45 @@ public class MovieController {
 		}
 	}
 
+	private void addCastAdnCrew(Movie m) {
+		List<Principals> principals = getPeopleIdsForTheMovie(m.getMovieId());
+
+		if (!principals.isEmpty()) {
+			for (Principals principals1 : principals) {
+				String nameId = principals1.getNameId();
+				Link castInfoLink = linkTo(methodOn(CrewAndCastController.class).getCrewAndCastInfo(nameId)).withRel("movie cast info");
+				m.add(castInfoLink);
+			}
+		}
+	}
+
+	private void addSeasonRatingLink(Movie m, HttpServletRequest request) {
+		Map<Integer, List<Integer>> seasonEpisodeMap = new HashMap<>();
+		if (m.getTitleType().equalsIgnoreCase("tvSeries")) {
+			List<Episode> episodes = episodeService.getAllEpisodes(m.getMovieId());
+
+			for (Episode ep : episodes) {
+				if (seasonEpisodeMap.get(ep.getSeasonNum()) != null)
+					seasonEpisodeMap.get(ep.getSeasonNum()).add(ep.getEpisodeNum());
+				else {
+					List l = new ArrayList<>();
+					l.add(ep.getEpisodeNum());
+					seasonEpisodeMap.put(ep.getSeasonNum(), l);
+				}
+			}
+			seasonEpisodeMap.entrySet().stream().forEach(e -> {
+				m.add(linkTo(methodOn(EpisodeController.class).getSeasonRating(m.getMovieId(), e.getKey(), request)).withRel("season Rating"));
+			});
+		}
+	}
+
+	/**
+	 * Get all the TVSeries for 2017 , including its cast , ratings and seasons ratings
+	 * @param pageable
+	 * @param assembler
+	 * @param request
+	 * @return Page of TVSeries
+	 */
 	@RequestMapping(value = "/tvSeries", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<PagedResources<Movie>> getAllTvSeries(Pageable pageable, PagedResourcesAssembler assembler, HttpServletRequest request) {
@@ -97,32 +135,23 @@ public class MovieController {
 		Page<Movie> series = movieService.getAllMovies(pageable, "2017", "tvSeries");
 		for (Movie m : series) {
 			addRatingLink(m);
-			Map<Integer, List<Integer>> seasonEpisodeMap = new HashMap<>();
-			if (m.getTitleType().equalsIgnoreCase("tvSeries")) {
-				List<Episode> episodes = episodeService.getAllEpisodes(m.getMovieId());
-
-				for (Episode ep : episodes) {
-					if (seasonEpisodeMap.get(ep.getSeasonNum()) != null)
-						seasonEpisodeMap.get(ep.getSeasonNum()).add(ep.getEpisodeNum());
-					else {
-						List l = new ArrayList<>();
-						l.add(ep.getEpisodeNum());
-						seasonEpisodeMap.put(ep.getSeasonNum(), l);
-					}
-				}
-				seasonEpisodeMap.entrySet().stream().forEach(e -> {
-					m.add(linkTo(methodOn(EpisodeController.class).getSeasonRating(m.getMovieId(), e.getKey(), request)).withRel("season Rating"));
-				});
-			}
+			addSeasonRatingLink(m, request);
 		}
 		pr = assembler.toResource(series, linkTo(MovieController.class).slash("/tvSeries").withSelfRel());
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Link", createLinkMetadata(pr));
 		responseHeaders.add("Cache-Control", "max-age=3600");
-		logger.info("get tvsseries request success");
+		logger.info("get tvSseries request success");
 		return new ResponseEntity<>(assembler.toResource(series, linkTo(MovieController.class).slash("/tvSeries").withSelfRel()), responseHeaders, HttpStatus.OK);
 	}
 
+	/**
+	 * Get all the Movies for 2017 , including its cast and ratings
+	 * @param pageable
+	 * @param assembler
+	 * @param request
+	 * @return Page of TVSeries
+	 */
 	@RequestMapping(value = "/movies", produces = MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public ResponseEntity<PagedResources<Movie>> getAllMovies(Pageable pageable, PagedResourcesAssembler assembler, HttpServletRequest request) {
@@ -130,17 +159,9 @@ public class MovieController {
 		Page<Movie> movies = movieService.getAllMovies(pageable, "2017", "movie");
 		for (Movie m : movies) {
 			addRatingLink(m);
-
-			List<Principals> principals = getPeopleIdsForTheMovie(m.getMovieId());
-
-			if (!principals.isEmpty()) {
-				for (Principals principals1 : principals) {
-					String nameId = principals1.getNameId();
-					Link castInfoLink = linkTo(methodOn(CrewAndCastController.class).getCrewAndCastInfo(nameId)).withRel("movie cast info");
-					m.add(castInfoLink);
-				}
-			}
+			addCastAdnCrew(m);
 		}
+
 		pr = assembler.toResource(movies, linkTo(MovieController.class).slash("/movies").withSelfRel());
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.add("Link", createLinkMetadata(pr));

@@ -11,7 +11,7 @@ public class ApiErrorController implements ErrorController {
 
 	@RequestMapping(value = PATH)
 	public String error() {
-		return ".Something is wrong. Contact Admin For more Information";
+		return "Something is wrong. Contact Admin For more Information";
 	}
 
 	@Override

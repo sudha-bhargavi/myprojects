@@ -82,7 +82,7 @@ public class EpisodecontrollerTest extends AbstractTestSetup {
 	 *
 	 * STEP2: Get the existing rating for this season. Will also give current Server ETag
 	 *
-	 * STEP3: Update and episode for this season using  Etag
+	 * STEP3: Update an episode for this season using  Etag
 	 *
 	 * STEP4: Redo the Get request for the seasons rating.
 	 *
@@ -162,8 +162,7 @@ public class EpisodecontrollerTest extends AbstractTestSetup {
 		Double existingSeasonRating2  = Double.parseDouble(s3);
 
 		//Result :
-		assertTrue(existingSeasonRating2 != existingSeasonRating);
-		//ResponseEntity<PagedResources<EmployeeResource>> responseEntity = restTemplate.exchange("URI", HttpMethod.GET, null, new ParameterizedTypeReference<PagedResources<EmployeeResource>>(){});
+		assertTrue(existingSeasonRating2 != existingSeasonRating);	
 	}
 
 }

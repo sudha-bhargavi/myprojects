@@ -5,6 +5,8 @@ import com.domain.myprojects.moviesservice.resource.Movie;
 import com.domain.myprojects.moviesservice.resource.Rating;
 import com.domain.myprojects.moviesservice.service.EpisodeService;
 import com.domain.myprojects.moviesservice.service.RatingService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +27,21 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 @RestController
 @Component
 public class EpisodeController {
+	public static final Logger logger = LoggerFactory.getLogger(MovieController.class);
+
 	@Autowired
 	private RatingService ratingService;
 
 	@Autowired
 	private EpisodeService episodeService;
 
+	/**
+	 * Get Season rating
+	 * @param id
+	 * @param seasonnum
+	 * @param request
+	 * @return Rating value
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/tvSeries/{id}/season/{seasonnum}/rating", method = RequestMethod.GET)
 	public ResponseEntity<Double> getSeasonRating(@PathVariable String id, @PathVariable Integer seasonnum, HttpServletRequest request) {
@@ -48,9 +59,16 @@ public class EpisodeController {
 			return ResponseEntity.ok().eTag(etagServer).body(rating);
 		}
 
+		logger.info("Season rating obtained {}",id);
 		return ResponseEntity.status(412).eTag(etagServer).build();
 	}
 
+	/**
+	 * Get all the episodes assosiated with a sesason for a TV Series
+	 * @param id
+	 * @param num
+	 * @return List of episodes
+	 */
 	@ResponseBody
 	@RequestMapping(value = "/tvSeries/{id}/season/{num}/episodes", method = RequestMethod.GET)
 	public ResponseEntity<List<Episode>> getEpisodesForSeason(@PathVariable String id, @PathVariable Integer num) {
@@ -66,6 +84,7 @@ public class EpisodeController {
 	}
 
 	private String calulateETag(List<Episode> episodes) {
+		logger.info("Calculating ETag for");
 		return String.valueOf(String.valueOf(episodes.stream().map(episode -> ratingService.getMovieRatings(episode.getEpisodeId()))
 				.filter(rating -> rating.getRating()!= null)
 				.mapToDouble(rating -> rating.getRating())
