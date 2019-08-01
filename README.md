@@ -13,7 +13,7 @@ Implemented on HATEOS architecture pattern.
 Using H2 in memory DB for persistence. Configured JPA ORM talk to H2.
 
 
-Use Etags headers for syncroniation of updates. Other option was to use Last update time or VERSION ATTRIBUTE for syncronization , but wanted to ake sure hashing of object`s content would me more accurate to achieve syncronization.
+Use Etag headers for syncroniation of updates. Other option was to use Last update time or VERSION ATTRIBUTE for syncronization , but wanted to ake sure hashing of object`s content would me more accurate to achieve syncronization.
 
 
 
@@ -50,10 +50,10 @@ Use Etags headers for syncroniation of updates. Other option was to use Last upd
               9: CastAndCrew.csv Episode.csv	Principals.csv	 Ratings.csv	Titles.csv 
               
               
-              10: Next place the moviedb.mv.db file in the HOME directory eg : ~/moviedb. This will help pre start the db with
+              10: Next place the provided moviedb.mv.db file in the HOME directory eg : ~/moviedb. This will help pre start  
 	      
 	      
-	      out creating it again from scratch.
+	      db with out creating it again from scratch.
               
               
               11: Structure of the current directoty Test/myprojects should now look like this:
@@ -71,7 +71,7 @@ Use Etags headers for syncroniation of updates. Other option was to use Last upd
 	      13: I am using in memory H2 Database for persisting the data. This is configured to look into ~/moviedb
 	      
 	      
-	      for file persistence between restarts of the server.
+	      for file persistence between restarts of the server. Make sure provided moviedb file in HOME directory.
 	      
 	      
 	      http://localhost:8080/h2  will bring up the DB console.
@@ -109,7 +109,7 @@ Use Etags headers for syncroniation of updates. Other option was to use Last upd
               This API will pull a movie or tvSeries with the give ID, and its ratings and their seson ratings.
               
 
-<h4>2nd Part of the Task</h4>: Tv Series`s  seasons rating is calculated using Average rating of all its episodes
+<h4>2nd Part of the Task</h4> Tv Series`s  seasons rating is calculated using Average rating of all its episodes
               
               
               5: URL GET: localhost:8080/tvSeries/{id}/rating 
@@ -124,10 +124,10 @@ Use Etags headers for syncroniation of updates. Other option was to use Last upd
               This API will return all the episodes that belong to a season of a tvSeries.
 	      
 	      
-	      Using this we can see what the ratings of each indiccidual episode is.
+	      Using this we can see what the ratings of each individual episode is.
 	      
 	      
-	      Average of all the episodes rating is the season rating
+	      Average of all the episodes rating will be the season`s rating
               
               
               7: URL GET http://localhost:8080/tvSeries/{id}/season/{seasonnum}/rating
@@ -142,10 +142,10 @@ Use Etags headers for syncroniation of updates. Other option was to use Last upd
 <h4>3rd Part of the Task</h4>
 	      
 	      
-	      For syncronization I am using EntityTags (ETag)  headers (If-Match header) in the client requests to solve
+	      For syncronization I am using EntityTags (ETag) headers (If-Match header) in the client requests to solve
 	       
 	      
-	      LOST updates. This way we can achieve optimistic locking on the resource updates. 
+	      LOST updates. This way we can achieve optimistic locking on the concurrent resource updates. 
 	      
 	      
 	      URL: PUT localhost:8080/tvSeries/{id}/rating
@@ -185,13 +185,13 @@ Use Etags headers for syncroniation of updates. Other option was to use Last upd
 	      ource only if the Etags on the server side match . Request 1 with Etag 1 updates a resource. Request 2 with ETag 
 	      
 	      
-	      1 will now fail and will retry with the updated resoucre and new ETag. This is more of an optimistic approach.
+	      1 will now fail and will retry with the updated resource and new ETag. This is more of an optimistic approach.
 	      
 	      
 	      
 <h3>Integration Junit Testing </h3>
 
-Some integration tests have been added to the application to test the above usecases.  
+Some integration tests have been added to the application to test the above 3 usecases.  
 	      
 	      
 	      
