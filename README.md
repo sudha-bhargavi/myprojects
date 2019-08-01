@@ -4,7 +4,7 @@
 <h3>Design considerations</h3>
 
 
-Developed Rest Api using Spring framework based on Controller -> Service -> Repository model. 
+Developed Rest Api using Spring Boot framework based on Controller -> Service -> Repository model. 
 
 
 Implemented on HATEOAS architecture pattern.
@@ -13,7 +13,7 @@ Implemented on HATEOAS architecture pattern.
 Using H2 in memory DB for persistence. Configured JPA ORM layer to talk to H2.
 
 
-Use Etags headers for synchronization of updates. Other option was to use Last update time or VERSION ATTRIBUTE for syncronization , but wanted to ake sure hashing of object`s content would me more accurate to achieve syncronization.
+Use Etag headers for synchronization of updates. Other option was to use Last update time or VERSION ATTRIBUTE for syncronization , but wanted to ake sure hashing of object`s content would me more accurate to achieve syncronization.
 
 
 
@@ -32,7 +32,7 @@ Use Etags headers for synchronization of updates. Other option was to use Last u
 							
 			4: git init
 							
-			4: git clone https://github.com/rahulkuppachi/myprojects.git
+			4: git clone https://github.com/sudha-bhargavi/myprojects.git
               
               
               5: This will create application repo in the current directory called myprojects
@@ -145,6 +145,12 @@ Use Etags headers for synchronization of updates. Other option was to use Last u
 
 
 	TvSeries with ID tt10016348 "http://localhost:8080/tvSeries/tt10016348"  has 2 seasons
+	
+	
+	GET Call this API to see the list of episodes as below:
+	
+	
+	http://localhost:8080/tvSeries/tt10016348/season/1/episodes
 	
 	
 	Season1 has 10 episdoes as below  with null rating for each episode
@@ -272,7 +278,7 @@ Use Etags headers for synchronization of updates. Other option was to use Last u
 	    }
 	    
 	    
-	    Hence when we do a get on Season 1`s  rating we get 0 value
+	    Hence when we do a GET on Season 1`s  rating we get 0 rating value
 	    
 	    
 	    "http://localhost:8080/tvSeries/tt10016348/season/1/rating"  (use Etag header If-Match = 47602)
@@ -281,13 +287,14 @@ Use Etags headers for synchronization of updates. Other option was to use Last u
 	    Now do a put on one of the episodes tt10020072 , rating by calling
 	    
 	    
-	    PUT  http://localhost:8080/tvSeries/tt10014818/rating with 
+	    PUT  http://localhost:8080/tvSeries/tt10020090/rating with (Notice here the Id is episode ID)
 	    
 	    
-	    payload {
+	   Eg: payload 
+	   	{
    		 "rating": 20.0,
   		  "votes": 10,
-  		  "movieId": "tt10020072"
+  		  "movieId": "tt10020090"
   		  }
     
     
@@ -309,7 +316,7 @@ Use Etags headers for synchronization of updates. Other option was to use Last u
     episode rating. Resend the Get request with the new Etag and get the new rating which should be avg value of all non 
     
     
-    null episodes. in this case just one episode.
+    null episodes. In this case just one episode.
 	 
 	      
 <h4>3rd Part of the Task</h4>
@@ -377,6 +384,15 @@ Add ORM Caching level caching
 
 
 Implement security of rest APIs with Oauth tokens using a OAuth protocol and end to end using TLS.
+
+
+<h3> Swagger API Spec (work in progress) </h3>
+
+
+Planned on providng a SWAGGER API document. Due to time constarint could not finish the Swagger spec details. Partial not much usable
+
+
+Swagger link is availble here http://localhost:8080/swagger-ui.html#!
 
 
 
