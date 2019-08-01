@@ -26,7 +26,7 @@ Use Etag headers for synchronization of updates. Other option was to use Last up
               1. Make sure maven is availble on your machine
 							
 							
-			2: From a Terminal create a directory eg:Test 
+			2: From a terminal/console create a directory (eg:Test)
 			
 			3: cd Test
 							
@@ -35,7 +35,7 @@ Use Etag headers for synchronization of updates. Other option was to use Last up
 			4: git clone https://github.com/sudha-bhargavi/myprojects.git
               
               
-              5: This will create application repo in the current directory called myprojects
+              5: This will create application repo under the current Test directory called myprojects
               
               
               6: cd myprojects
@@ -44,7 +44,7 @@ Use Etag headers for synchronization of updates. Other option was to use Last up
               7:In this directory create a directory called seeddata. This directory holds the data pulled from IMDB.
               
               
-              8:Copy the seeddata files(seedata.zip provided as an attachment) into this seeddata directory
+              8:Extract and copy the 5 seeddata files(seedata.zip provided as an gmail drive link) into this seeddata directory
               
               
               9: CastAndCrew.csv Episode.csv	Principals.csv	 Ratings.csv	Titles.csv 
@@ -53,16 +53,19 @@ Use Etag headers for synchronization of updates. Other option was to use Last up
               10: Next place the moviedb.mv.db file in the HOME directory eg : ~/moviedb. This will help pre start the db with
 	      
 	      
-	      out creating it again from scratch.(moviedb.zip provide via shared google drive link)
+	      out creating it again from scratch.(Extract from , moviedb.zip provided via shared google drive link)
               
               
               11: Structure of the current directoty Test/myprojects should now look like this:
               
               
-              pom.xml		seeddata	src		target
+              pom.xml	seeddata	src		target
               
               
-              12: From the directory myprojects run the command mvn spring-boot:run
+              12: From the directory myprojects run the command mvn spring-boot:run 
+	      
+	      
+	      Or you can run application from any IDE IntelliJ / Eclipse by importing the project as maven project.
               
               
               This will run Apache server and deploy application on localhost port 8080 
@@ -74,7 +77,7 @@ Use Etag headers for synchronization of updates. Other option was to use Last up
 	      for file persistence between restarts of the server.
 	      
 	      
-	      http://localhost:8080/h2  will bring up the DB console.
+	      http://localhost:8080/h2  will bring up the DB console.Username sa  No password
 	      
 	      
               jdbc URL for h2 console: jdbc:h2:~/moviedb
