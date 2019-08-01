@@ -53,7 +53,7 @@ Use Etag headers for synchronization of updates. Other option was to use Last up
               10: Next place the moviedb.mv.db file in the HOME directory eg : ~/moviedb. This will help pre start the db with
 	      
 	      
-	      out creating it again from scratch.
+	      out creating it again from scratch.(moviedb.zip provide via shared google drive link)
               
               
               11: Structure of the current directoty Test/myprojects should now look like this:
